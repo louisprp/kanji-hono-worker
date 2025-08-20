@@ -20,6 +20,7 @@ const PayloadSchema = v.object({
       return n >= 1 && n <= 3
     }, 'chars must contain 1 to 3 characters')
   ),
+  theme: v.optional(v.union([v.literal('light'), v.literal('dark')]))
 })
 
 await initWasm(wasmUrl)
@@ -31,7 +32,8 @@ app.post(
   bearerAuth({ verifyToken: (token, c) => token === c.env.AUTH_TOKEN }),
   vValidator('json', PayloadSchema),
   async (c) => {
-    const { chars } = c.req.valid('json')
+    const { chars, theme = 'light' } = c.req.valid('json')
+    const dark = theme === 'dark'
 
     // Fetch KanjiVG SVGs
     const glyphs = Array.from(chars)
@@ -48,9 +50,25 @@ app.post(
     const sources = await Promise.all(resps.map((r) => r.text()))
     const roots = await Promise.all(sources.map((s) => parse(s)))
 
-    const unit = 109
+const unit = 109
     let offsetX = 0
     const glyphGroups: Node[] = []
+
+    // tiny helpers to tweak inline style strings or attributes
+    const setStyleProp = (style: string | undefined, key: string, value: string) => {
+      const map = new Map<string, string>(
+        (style ?? '')
+          .split(';')
+          .map(s => s.trim())
+          .filter(Boolean)
+          .map(s => {
+            const i = s.indexOf(':')
+            return [s.slice(0, i).trim(), s.slice(i + 1).trim()]
+          }) as [string, string][]
+      )
+      map.set(key, value)
+      return Array.from(map.entries()).map(([k, v]) => `${k}:${v}`).join(';')
+    }
 
     for (const root of roots) {
       const groups =
@@ -60,6 +78,25 @@ app.post(
             n.name === 'g' &&
             /^(kvg:StrokePaths_|kvg:StrokeNumbers_)/.test(n.attributes?.id ?? '')
         ) ?? []
+
+      // override colors for dark/light only at the top-level groups we keep
+      for (const g of groups) {
+        const id = g.attributes?.id ?? ''
+        if (id.startsWith('kvg:StrokePaths_')) {
+          // strokes (the character)
+          const style = g.attributes?.style
+          g.attributes = g.attributes || {}
+          g.attributes.style = setStyleProp(style, 'stroke', dark ? '#ffffff' : '#000000')
+          // ensure fill:none stays put (these are paths)
+          g.attributes.style = setStyleProp(g.attributes.style, 'fill', 'none')
+        } else if (id.startsWith('kvg:StrokeNumbers_')) {
+          // stroke order numbers
+          const style = g.attributes?.style
+          g.attributes = g.attributes || {}
+          g.attributes.style = setStyleProp(style, 'fill', dark ? '#c8c8c8' : '#808080')
+          // keep font-size etc. intact
+        }
+      }
 
       glyphGroups.push({
         type: 'element',
@@ -94,16 +131,15 @@ app.post(
         defaultFontFamily: 'Noto Serif',
         loadSystemFonts: false,
       },
-      background: 'white',
+      // <-- flip background per theme
+      background: dark ? 'black' : 'white',
     })
 
     const png = resvg.render().asPng()
 
     return new Response(png, {
       status: 200,
-      headers: {
-        'Content-Type': 'image/png'
-      },
+      headers: { 'Content-Type': 'image/png' },
     })
   }
 )
