@@ -2,7 +2,16 @@
   "$schema": "node_modules/wrangler/config-schema.json",
   "name": "kanji-hono-worker",
   "main": "src/index.ts",
-  "compatibility_date": "2025-08-19"
+  "compatibility_date": "2025-08-19",
+  "rules": [
+    {
+      "type": "Data",
+      "globs": [
+        "**/*.ttf"
+      ],
+      "fallthrough": true
+    }
+  ]
   // "compatibility_flags": [
   //   "nodejs_compat"
   // ],
