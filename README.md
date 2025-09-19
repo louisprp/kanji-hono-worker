@@ -1,4 +1,4 @@
-# KanjiVG → PNG (Hono • Cloudflare Worker)
+# KanjiVG → PNG (Hono on Cloudflare Workers)
 
 <p align="center">
   <a href="https://www.typescriptlang.org/"><img alt="TypeScript" src="https://img.shields.io/badge/TypeScript-5.x-blue"></a>
@@ -10,7 +10,7 @@ A tiny authenticated HTTP API that composes 1–3 Japanese characters from Kanji
 
 ---
 
-## ✨ Highlights
+## Highlights
 
 * 🔐 **Bearer auth** with a single token (`AUTH_TOKEN`)
 * ✅ **Request validation** via `@hono/valibot-validator`
@@ -20,7 +20,7 @@ A tiny authenticated HTTP API that composes 1–3 Japanese characters from Kanji
 
 ---
 
-## 📱 iOS Shortcut Demo (usage example)
+## iOS Shortcut Demo (usage example)
 
 > Showcase using an iOS Shortcut that calls the Worker and displays the image response.
 
@@ -28,7 +28,7 @@ https://github.com/user-attachments/assets/1c712e65-f3f5-447a-a797-73cb4597f184
 
 ---
 
-## 🧠 What it does
+## What it does
 
 1. Accepts a POST to `/` with JSON payload:
 
@@ -42,7 +42,7 @@ https://github.com/user-attachments/assets/1c712e65-f3f5-447a-a797-73cb4597f184
 
 ---
 
-## 🧪 Quick try (curl)
+## Quick try (curl)
 
 > Replace `https://your-worker.example.com` and `YOUR_TOKEN`.
 
@@ -56,7 +56,7 @@ curl -X POST https://your-worker.example.com/ \
 
 ---
 
-## 🔌 API
+## API Reference
 
 ### `POST /`
 
@@ -79,7 +79,7 @@ type Payload = {
 
 ---
 
-## ⚙️ Setup & Development
+## Setup & Development
 
 1. **Install**
 
@@ -109,7 +109,7 @@ type Payload = {
 
 ---
 
-## 🤝 Attribution
+## Attribution
 
 * **KanjiVG**: © Ulrich Apel et al., licensed under **CC BY-SA 3.0**. See [https://kanjivg.tagaini.net/](https://kanjivg.tagaini.net/).
   If you publish generated images, ensure attribution as required by the license.
